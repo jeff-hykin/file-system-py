@@ -5,7 +5,7 @@ An work-in-progress library for file manipulation in python. <br>
 
 # How do I use this?
 
-`pip install file-system-python`
+`pip install file-system-py`
 
 
 ```python
