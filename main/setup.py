@@ -26,8 +26,8 @@ setuptools.setup(
     license=package_info["license"],
     packages=[package_info["name"]],
     install_requires=[
+        'walk_up >= 0.1.0',
         # examples:
-        # 'aiohttp >= 3.7.4',
         # 'python-socketio >= 5.3.0',
         # 'requests == 2.26.0',
     ],
