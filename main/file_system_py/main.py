@@ -62,6 +62,31 @@ def ensure_is_file(path, *, force=True):
         write("", to=path)
     return path
 
+def move_out_of_the_way(path, extension=".old"):
+    if exists(path):
+        new_path = path+extension
+        move_out_of_the_way(new_path, extension)
+        move(item=path, to=os.path.dirname(new_path), new_name=os.path.basename(new_path))
+    
+def clear_a_path_for(path, overwrite=False, extension=".old"):
+    original_path = path
+    paths = []
+    while os.path.dirname(path) != path:
+        paths.append(path)
+        path = os.path.dirname(path)
+    
+    paths.reverse()
+    for each_path in paths:
+        if not exists(each_path):
+            break
+        if is_file(each_path):
+            if overwrite:
+                remove(each_path)
+            else:
+                move_out_of_the_way(each_path, extension)
+    ensure_is_folder(os.path.dirname(original_path))
+    return original_path
+
 def copy(item, *, to, new_name="", force=True):
     if new_name == "":
         raise Exception('copy() needs a new_name= argument:\n    copy(item="location", to="directory", new_name="")\nif you want the name to be the same as before do new_name=None')
@@ -174,6 +199,7 @@ def touch_dir(path):
 def parent_folder(path):
     return os.path.dirname(path)
 
+parent_path = parent_folder
 dirname = parent_folder
 
 def basename(path):
