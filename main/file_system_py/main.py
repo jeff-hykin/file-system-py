@@ -99,7 +99,7 @@ def copy(item, *, to, new_name="", force=True):
     if force and exists(to):
         remove(to)
     # make sure the containing folder exists
-    create_folder(os.path.dirname(to))
+    ensure_is_folder(os.path.dirname(to))
     if os.path.isdir(item):
         shutil.copytree(item, to)
     else:
@@ -114,7 +114,7 @@ def move(item, *, to=None, new_name="", force=True):
     # get the full path
     to = os.path.join(to, new_name)
     # make sure the containing folder exists
-    create_folder(os.path.dirname(to))
+    ensure_is_folder(os.path.dirname(to))
     shutil.move(item, to)
 
 def exists(path):
@@ -189,12 +189,12 @@ def glob(path):
     return glob.glob(path)
 
 def touch(path):
-    create_folder(dirname(path))
+    ensure_is_folder(dirname(path))
     if not exists(path):
         write("", to=path)
 
 def touch_dir(path):
-    create_folder(path)
+    ensure_is_folder(path)
 
 def parent_folder(path):
     return os.path.dirname(path)
