@@ -206,7 +206,7 @@ def basename(path):
     return os.path.basename(path)
 
 def name(path):
-    filename, file_extension = os.path.splitext(path)
+    filename, file_extension = os.path.splitext(os.path.basename(path))
     return filename
 
 def extname(path):
