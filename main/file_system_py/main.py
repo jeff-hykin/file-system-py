@@ -85,6 +85,11 @@ def clear_a_path_for(path, overwrite=False, extension=".old"):
             else:
                 move_out_of_the_way(each_path, extension)
     ensure_is_folder(os.path.dirname(original_path))
+    if overwrite:
+        remove(path)
+    else:
+        move_out_of_the_way(path, extension)
+    
     return original_path
 
 def copy(item, *, to, new_name="", force=True):
