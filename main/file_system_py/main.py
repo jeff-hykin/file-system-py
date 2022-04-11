@@ -86,9 +86,9 @@ def clear_a_path_for(path, overwrite=False, extension=".old"):
                 move_out_of_the_way(each_path, extension)
     ensure_is_folder(os.path.dirname(original_path))
     if overwrite:
-        remove(path)
+        remove(original_path)
     else:
-        move_out_of_the_way(path, extension)
+        move_out_of_the_way(original_path, extension)
     
     return original_path
 
