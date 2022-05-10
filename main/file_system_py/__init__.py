@@ -159,7 +159,7 @@ def list_file_paths_in(path):
 
 def list_folder_paths_in(path):
     if is_folder(path):
-        return [ join(path, each) for each in os.listdir(path) if is_file(join(path, each)) ]
+        return [ join(path, each) for each in os.listdir(path) if is_folder(join(path, each)) ]
     else:
         return []
 
