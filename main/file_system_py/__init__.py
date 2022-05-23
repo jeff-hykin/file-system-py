@@ -4,10 +4,11 @@ import glob
 import shutil
 from pathlib import Path
 
-def write(data, *, to, force=True):
+def write(data, *, to=None, path=None, force=True):
+    path = to or path
     # make sure the path exists
-    if force: ensure_is_folder(parent_path(to))
-    with open(to, 'w') as the_file:
+    if force: ensure_is_folder(parent_path(path))
+    with open(path, 'w') as the_file:
         the_file.write(str(data))
 
 def read(filepath):
