@@ -126,8 +126,23 @@ def move(item, *, to=None, new_name="", force=True):
 def exists(path):
     return os.path.exists(path)
 
+def final_target_of(path):
+    # resolve symlinks
+    if os.path.islink(path):
+        have_seen = set()
+        while os.path.islink(path):
+            path = os.readlink(path)
+            if path in have_seen:
+                return None # circular broken link
+            have_seen.add(path)
+    return path
+
 def is_folder(path):
-    return os.path.isdir(path)
+    # resolve symlinks
+    final_target = final_target_of(path)
+    if not final_target:
+        return False
+    return os.path.isdir(final_target)
 # aliases    
 is_dir = is_directory = is_folder
     
@@ -184,12 +199,29 @@ def iterate_file_paths_in(path):
                 if entry.is_file():
                     yield os.path.join(path, entry.name)
 
-def iterate_folder_paths_in(path):
+def iterate_folder_paths_in(path, recursively=False, have_seen=None):
+    if recursively and have_seen is None: have_seen = set()
     if is_folder(path):
         with os.scandir(path) as iterator:
             for entry in iterator:
+                entry_is_folder = False
                 if entry.is_dir():
+                    entry_is_folder = True
+                    each_subpath_final_target = os.path.join(path, entry.name)
+                # check if symlink to dir
+                elif entry.is_symlink():
+                    each_subpath = os.path.join(path, entry.name)
+                    each_subpath_final_target = final_target_of(each_subpath)
+                    if is_folder(each_subpath_final_target):
+                        entry_is_folder = True
+                
+                if entry_is_folder:
                     yield os.path.join(path, entry.name)
+                    if recursively:
+                        have_not_already_seen_this = each_subpath_final_target not in have_seen
+                        have_seen.add(each_subpath_final_target) # need to add it before recursing
+                        if have_not_already_seen_this:
+                            yield from iterate_folder_paths_in(each_subpath_final_target, recursively, have_seen)
 
 def glob(path):
     return glob.glob(path)
