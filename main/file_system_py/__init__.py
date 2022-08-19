@@ -333,6 +333,17 @@ def local_path(*paths):
     
     return join(directory, *paths)    
 
+def line_count_of(file_path):
+    # from stack overflow "how to get a line count of a large file cheaply"
+    def _make_gen(reader):
+        while 1:
+            b = reader(2**16)
+            if not b: break
+            yield b
+    with open(file_path, "rb") as file:
+        count = sum(buf.count(b"\n" for buf in _make_gen(file.raw.read)))
+    
+    return count
 
 # TODO:
     # home()
