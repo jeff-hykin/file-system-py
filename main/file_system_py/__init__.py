@@ -341,7 +341,7 @@ def line_count_of(file_path):
             if not b: break
             yield b
     with open(file_path, "rb") as file:
-        count = sum(buf.count(b"\n" for buf in _make_gen(file.raw.read)))
+        count = sum(buf.count(b"\n") for buf in _make_gen(file.raw.read))
     
     return count
 
