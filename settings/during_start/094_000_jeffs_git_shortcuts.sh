@@ -11,12 +11,16 @@ git_checkout () {
         git switch "$@"
         return 
     }
-    printf '%s' "$__temp_var__branches" | grep "$2" 2>/dev/null 1>/dev/null && {
+    # if second arg exists
+    if [ -n "$2" ]
+    then
+        printf '%s' "$__temp_var__branches" | grep "$2" 2>/dev/null 1>/dev/null && {
+            unset __temp_var__branches
+            git switch "$@"
+            return
+        }
         unset __temp_var__branches
-        git switch "$@"
-        return
-    }
-    unset __temp_var__branches
+    fi
     # 
     # otherwise use checkout
     # 
@@ -24,17 +28,44 @@ git_checkout () {
     return
 }
 
+git_checkout_pr () {
+    pr_number="$1"
+    git_delete_branch '@__temp__/pull_request'
+    git fetch origin "pull/$pr_number/head:@__temp__/pull_request"
+    git checkout '@__temp__/pull_request'
+}
+
 git_commit_hashes () {
     git log --reflog --oneline | sed -e 's/ .*//'
 }
 
 git_log () {
-    git log --oneline
+    git log --first-parent --date=short --pretty=format:"%Cblue%ad %h%Cgreen %s %Creset%d"
 }
 
 git_current_commit_hash () {
     # https://stackoverflow.com/questions/949314/how-to-retrieve-the-hash-for-the-current-commit-in-git
     git rev-parse HEAD
+}
+
+git_oldest_commit_hash () {
+    git log --reverse --oneline | head -n1 | sed -e 's/ .*//' 
+}
+
+git_squash_all () {
+    git reset --soft $(git_oldest_commit_hash)
+}
+
+git_squash_to () {
+    commit_hash="$1"
+    commit_message="$2"
+    git reset --soft "$commit_hash" && git add -A && git commit -m "$commit_message" && echo "squash complete"
+}
+
+git_squash () {
+    args="$@"
+    git reset --soft HEAD~2 && git add -A && git commit -m "$args" && echo "squash complete"
+    git_log | head -n5
 }
 
 # 
@@ -361,7 +392,12 @@ git_delete_large_file () {
         exit 0
     fi
     
-    git filter-branch --index-filter "git rm -rf --cached --ignore-unmatch '$filepath'" HEAD
+    oldest_commit_with_file="$(git log --all --pretty=format:%H -- "$filepath" | tail -n 1)"
+    
+    echo "$oldest_commit_with_file"
+    
+    rm -rf .git/refs/original/
+    FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --index-filter "git rm -rf --cached --ignore-unmatch '$filepath'" "$oldest_commit_with_file"..HEAD
     echo 
     echo "Now you need to destroy everyone else's progress by force pushing if you want remote to have the fix"
     echo 
@@ -434,5 +470,7 @@ alias gb="git branch -a"
 alias gnb="git_new_branch"
 alias gd="git_delete_changes"
 alias gcp="git add -A;git stash"
+alias gct="git add -A;git stash"
 alias gpst="git stash pop;git add -A"
 alias gundo="git reset --soft HEAD~1"
+alias gurl="git_url_of_origin"
