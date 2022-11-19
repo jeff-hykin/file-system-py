@@ -251,6 +251,15 @@ def extname(path):
     filename, file_extension = os.path.splitext(path)
     return file_extension
 
+def without_ext(path):
+    started_with_dot_slash = path.startswith("./")
+    parent_folders = os.path.dirname(path)
+    filename, file_extension = os.path.splitext(path)
+    output = os.path.join(parent_folders, filename)
+    if not started_with_dot_slash and output.startswith("./"):
+        output = output[2:]
+    return output
+
 def path_pieces(path):
     """
     example:
