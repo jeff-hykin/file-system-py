@@ -260,7 +260,17 @@ def without_ext(path):
         output = output[2:]
     return output
 
+def without_any_ext(path):
+    started_with_dot_slash = path.startswith("./")
+    parent_folders = os.path.dirname(path)
+    filename = os.path.basename(path).split('.')[0]
+    output = os.path.join(parent_folders, filename)
+    if not started_with_dot_slash and output.startswith("./"):
+        output = output[2:]
+    return output
+
 without_extension = without_ext # alias
+without_any_extension = without_any_ext # alias
 
 def path_pieces(path):
     """
