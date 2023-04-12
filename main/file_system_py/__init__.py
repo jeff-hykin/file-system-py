@@ -4,6 +4,18 @@ import glob
 import shutil
 from pathlib import Path
 
+# python 3.5-3.8 has a problem with __file__ being relative to the initial cwd, (which isnt saved anywhere AFAIK) so when the user does a chdir() all the relative __file__ paths are meaningless
+# this is an attempt at a workaround, although it does fail if the user changed BOTH the PWD env variable and did os.chdir() before importing this module
+inital_pwd = None
+if os.name == 'nt': # "if windows"
+    inital_pwd = os.getenv("CD") # this is the windows pwd var
+else:
+    inital_pwd = os.getenv("PWD")
+
+intial_cwd = os.getcwd()
+if inital_pwd != intial_cwd:
+    initial_cwd = inital_pwd
+
 def write(data, *, to=None, path=None, force=True):
     path = to or path
     # make sure the path exists
@@ -343,6 +355,8 @@ def walk_up_until(file_to_find, start_path=None):
 def local_path(*paths):
     import os
     import inspect
+    
+    cwd = os.getcwd()
     # https://stackoverflow.com/questions/28021472/get-relative-path-of-caller-in-python
     try:
         frame = inspect.stack()[1]
@@ -350,9 +364,14 @@ def local_path(*paths):
         directory = os.path.dirname(module.__file__)
     # if inside a repl (error =>) assume that the working directory is the path
     except AttributeError as error:
-        directory = os.getcwd()
+        directory = cwd
     
-    return join(directory, *paths)    
+    if is_absolute_path(directory):
+        return join(directory, *paths)
+    else:
+        # See note at the top
+        return join(intial_cwd, directory, *paths)
+        
 
 def line_count_of(file_path):
     # from stack overflow "how to get a line count of a large file cheaply"
