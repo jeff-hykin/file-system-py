@@ -385,6 +385,9 @@ def line_count_of(file_path):
     
     return count
 
+def get_home():
+    return str(Path.home())
+
 # TODO:
     # home()
     # permissions
