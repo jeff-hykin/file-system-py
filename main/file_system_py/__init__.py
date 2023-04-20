@@ -33,7 +33,7 @@ def read(filepath):
     
 
 def remove(path):
-    if os.path.isdir(path):
+    if not Path(path).is_symlink() and os.path.isdir(path):
         shutil.rmtree(path)
     else:
         try:
