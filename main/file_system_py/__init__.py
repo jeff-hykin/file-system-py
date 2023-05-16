@@ -192,11 +192,14 @@ def list_folder_paths_in(path):
         return []
 
 # iterate is MUCH faster than listing for large folders
-def iterate_paths_in(path):
+def iterate_paths_in(path, recursively=False):
     if is_folder(path):
         with os.scandir(path) as iterator:
             for entry in iterator:
                 yield os.path.join(path, entry.name)
+        if recursively:
+            for each_sub_folder in iterate_folder_paths_in(path, recursively=True):
+                yield from iterate_paths_in(each_sub_folder, recursively=True)
 
 def iterate_basenames_in(path):
     if is_folder(path):
@@ -204,12 +207,15 @@ def iterate_basenames_in(path):
             for entry in iterator:
                 yield entry.name
 
-def iterate_file_paths_in(path):
+def iterate_file_paths_in(path, recursively=False):
     if is_folder(path):
         with os.scandir(path) as iterator:
             for entry in iterator:
                 if entry.is_file():
                     yield os.path.join(path, entry.name)
+        if recursively:
+            for each_sub_folder in iterate_folder_paths_in(path, recursively=True):
+                yield from iterate_file_paths_in(each_sub_folder, recursively=False)
 
 def iterate_folder_paths_in(path, recursively=False, have_seen=None):
     if recursively and have_seen is None: have_seen = set()
