@@ -369,7 +369,7 @@ def local_path(*paths):
         module = inspect.getmodule(frame[0])
         directory = os.path.dirname(module.__file__)
     # if inside a repl (error =>) assume that the working directory is the path
-    except AttributeError as error:
+    except (AttributeError, IndexError) as error:
         directory = cwd
     
     if is_absolute_path(directory):
