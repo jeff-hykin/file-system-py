@@ -341,15 +341,39 @@ def make_relative_path(*, to, coming_from=None):
 def get_cwd():
     return os.getcwd()
 
-def walk_up_until(file_to_find, start_path=None):
-    here = start_path or os.getcwd()
-    if not os.path.isabs(here):
-        here = os.path.join(os.getcwd(), file_to_find)
-    
+def walk_up_until(subpaths, start_path=None, include_basename=False):
+    """
+        Examples:
+            walk_up_until(".git", include_basename=True)
+            # returns f"{something}/.git" or None
+            
+            walk_up_until(".git")
+            # returns f"{something}" or None
+            
+            walk_up_until(".git/config")
+            # also returns f"{something}" or None
+            
+            walk_up_until(["setup.py", "requirements"], include_basename=True)
+            # returns either f"{something1}/setup.py" or f"{something2}/requirements.txt"
+            # depending on which appears closer to the start_path
+    """
+    if not start_path:
+        here = os.getcwd()
+    elif os.path.isabs(start_path):
+        here = start_path
+    else:
+        here = os.path.join(os.getcwd(), start_path)
+    # handle singlton input 
+    if isinstance(subpaths, (str, Path)):
+        subpaths = (subpaths, )
     while 1:
-        check_path = os.path.join(here, file_to_find)
-        if os.path.exists(check_path):
-            return check_path
+        for each in subpaths:
+            check_path = os.path.join(here, subpaths)
+            if os.path.exists(check_path):
+                if include_basename:
+                    return check_path
+                else:
+                    return here
         
         # reached the top
         if here == os.path.dirname(here):
