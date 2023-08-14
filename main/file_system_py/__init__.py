@@ -16,6 +16,9 @@ intial_cwd = os.getcwd()
 if inital_pwd != intial_cwd:
     initial_cwd = inital_pwd
 
+def normalize(path):
+    return os.path.normpath(path)
+
 def write(data, *, to=None, path=None, force=True):
     path = to or path
     # make sure the path exists
