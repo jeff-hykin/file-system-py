@@ -404,6 +404,26 @@ def local_path(*paths):
     else:
         # See note at the top
         return join(intial_cwd, directory, *paths)
+
+def path_of_caller(*paths, stack_level=1):
+    import os
+    import inspect
+    
+    cwd = os.getcwd()
+    # https://stackoverflow.com/questions/28021472/get-relative-path-of-caller-in-python
+    try:
+        frame = inspect.stack()[1+stack_level]
+        module = inspect.getmodule(frame[0])
+        directory = os.path.dirname(module.__file__)
+    # if inside a repl (error =>) assume that the working directory is the path
+    except (AttributeError, IndexError) as error:
+        directory = cwd
+    
+    if is_absolute_path(directory):
+        return join(directory, *paths)
+    else:
+        # See note at the top
+        return join(intial_cwd, directory, *paths)
         
 
 def line_count_of(file_path):
