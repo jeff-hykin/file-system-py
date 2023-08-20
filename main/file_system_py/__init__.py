@@ -19,10 +19,13 @@ if inital_pwd != intial_cwd:
 def normalize(path):
     return os.path.normpath(path)
 
-def write(data, *, to=None, path=None, force=True):
+def write(data, *, to=None, path=None, force=True, create_parent_folders=True):
     path = to or path
     # make sure the path exists
-    if force: ensure_is_folder(parent_path(path))
+    if create_parent_folders:
+        ensure_is_folder(parent_path(path), force=force)
+    if force and os.path.isdir(path):
+        shutil.rmtree(path)
     with open(path, 'w') as the_file:
         the_file.write(str(data))
 
@@ -453,3 +456,31 @@ def get_home():
     # readBytes
     # tempFile
     # tempFolder
+
+# WIP: remove me
+# def caller_id(*paths, anchor_points=["requirements.txt", ".git",]):
+#     import os
+#     import inspect
+    
+#     cwd = os.getcwd()
+#     # https://stackoverflow.com/questions/28021472/get-relative-path-of-caller-in-python
+#     try:
+#         frame = inspect.stack()[1]
+#         module = inspect.getmodule(frame[0])
+#         root_path = walk_up_until(anchor_points, start_path=os.getcwd())
+#         consistent_hash(read(module.__file__))
+#         if root_path != None:
+#             file_id = make_relative_path(to=module.__file__, coming_from=root_path)
+#         else:
+#             file_id = module.__name__
+#         position_in_file = tuple(frame.positions)
+#         return (fild_id, position_in_file)
+#     # if inside a repl (error =>) assume that the working directory is the path
+#     except (AttributeError, IndexError) as error:
+#         directory = cwd
+    
+#     if is_absolute_path(directory):
+#         return join(directory, *paths)
+#     else:
+#         # See note at the top
+#         return join(intial_cwd, directory, *paths)
