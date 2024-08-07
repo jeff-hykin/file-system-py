@@ -1,6 +1,6 @@
 import sys
 import os
-import glob
+import glob as glob_module
 import shutil
 from pathlib import Path
 
@@ -248,7 +248,7 @@ def iterate_folder_paths_in(path, recursively=False, have_seen=None):
                             yield from iterate_folder_paths_in(each_subpath_final_target, recursively, have_seen)
 
 def glob(path):
-    return glob.glob(path)
+    return glob_module.glob(path)
 
 def touch(path):
     ensure_is_folder(dirname(path))
